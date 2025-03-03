@@ -1,11 +1,11 @@
-
-body {
+ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     
    
- }.container {
+ }
+ .container {
     width: 400px;
     margin: 50px auto;
     background: white;
@@ -19,7 +19,8 @@ body {
     width: 100%;
 }
 
-h1 {
+.header h1, .header h2 {
+    margin-left: 50px;
     text-align: center;
     color: #ffffff;
 }
@@ -27,30 +28,33 @@ h1 {
 p {
     text-align: center;
     color: #ffffff;
+} 
+.header-btn {
+    display: flex;
 }
-.back-button {
-    
-    flex-direction: column;
-    gap: 5px;
-    position: absolute;
+ .back-button, .update-button {
+    display: flex;
+    right: 5px;
     top: 20px;
-    right: 20px;
+    margin: 20px 20px;
     cursor: pointer;
-}
-
-
-/* Header styling */
+}  
 .header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     background-color: #5CB338;
     color: rgb(233, 233, 233);
     text-align: center;
     padding: 5px;
     font-size: 12px;
-}
+} 
 
 .header button {
+    width: 100%;
     background-color: #213555;
-    padding-right: 12px;
+    padding: 10px 15px;
+    transition: background-color 0.3s ease;
 }
 
 input, select, button ,textarea{
@@ -60,17 +64,17 @@ input, select, button ,textarea{
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 16px;
-}
+} 
 
-button {
+ button {
     background: #5CB338;
     color: white;
-    font-size: 18px;
+    font-size: 14px;
     cursor: pointer;
     border: none;
     transition: 0.3s;
-}
+} 
 
 button:hover {
     background: #3A7D44;
-}
+ } 

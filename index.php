@@ -1,6 +1,6 @@
 
 <?php
-
+// Database connection
 $host = 'localhost';
 $dbname = 'hotel_booking';
 $username = 'root';
@@ -13,7 +13,7 @@ try {
     die("Database connection failed: " . $e->getMessage());
 }
 
-
+// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $full_name = htmlspecialchars($_POST['name'] ?? '');
     $email = htmlspecialchars($_POST['c_email'] ?? '');
@@ -21,12 +21,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $comment = htmlspecialchars($_POST['comment'] ?? '');
     $additional_message = htmlspecialchars($_POST['additional'] ?? '');
 
-   
+    // Validate required fields
     if (empty($full_name) || empty($email) || empty($phone)) {
         die("Name, email, and phone are required fields.");
     }
 
-  
+    // Insert data into the database
     try {
         $stmt = $pdo->prepare("
             INSERT INTO user_comments (full_name, email, phone, comment, additional_message)
@@ -41,13 +41,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ':additional_message' => $additional_message
         ]);
 
-        echo "<script> alert('Thank you for your comment!');</script>";
+        echo "Thank you for your comment!";
     } catch (PDOException $e) {
         die("Error saving your comment: " . $e->getMessage());
     }
 }
 ?>
 
+<!-- Your existing HTML form for comments -->
  <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -75,8 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <a href="#contact-us"><h1>Contact Us</h1></a>
             </div>
             <div class="sub-header">
-                <button><a href="room-booking.php">Book Now</a></button> 
-                <button><a href="admin.php">Manage Rooms</a></button> 
+                <button onclick="location.href='room-booking.php'">Book Now</button> 
+                <button onclick="location.href='admin.php'">Manage Rooms</button> <!-- Link to Admin Login -->
             </div>
         </div>
     </div>
@@ -114,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             
             No matter which room you choose, you will enjoy a clean, peaceful, and relaxing stay. Book with us today for a great experience!</p>
         <div class="list-of-rooms">
-            <div class="room-components"><img src=images/pexels-aftabmirza-30761844.jpg" alt="" class="rooms-image">
+            <div class="room-components"><img src="images/pexels-aftabmirza-30761844.jpg" alt="" class="rooms-image">
             <h1 class="title">Standard Room</h1><br><div class="sub-header">
                 <button>Book Rooms</button>
             </div></div>
@@ -215,15 +216,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </div>
     <div class="contact-us" id="contact-us">
         <h1>Contact Us</h1>
-    <form action="" method="post">
-        <label for="name">Full Name : </label><input type="text" name="name" placeholder="eg.abebe"><br>
-        <label for="email">Email : </label><input type="email" name="c_email" placeholder="eg.john@gmail.com"><br>
-        <label for="phone">Phone : </label><input type="tel" name="c_phone" placeholder="eg.0957568234"> <br>
-        <label for="comment">Comment : </label><input type="text" name="comment" placeholder="  comment....."><br>
-        <textarea name="additional" id="textarea" rows="10" name="message" placeholder="Additional Message"></textarea><br>
-        <input type="submit">
-    </form>
-</div>
+        <div class="contact-form">
+            <form action="" method="post">
+            <label for="name">Full Name : </label><input type="text" name="name" placeholder="eg.abebe"><br>
+            <label for="email">Email : </label><input type="email" name="c_email" placeholder="eg.john@gmail.com"><br>
+            <label for="phone">Phone : </label><input type="tel" name="c_phone" placeholder="eg.0957568234"> <br>
+            <label for="comment">Comment : </label><input type="text" name="comment" placeholder="  comment....."><br>
+            <textarea name="additional" id="textarea" rows="10" name="message" placeholder="Additional Message"></textarea><br>
+            <input type="submit">
+            </form>
+        </div>
+        
+    </div>
 
     <div class="guest-rate">
 <h1>Comments</h1>
