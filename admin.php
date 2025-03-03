@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-// Database connection
+
 $host = 'localhost';
 $dbname = 'hotel_booking';
 $username = 'root';
@@ -14,13 +14,13 @@ try {
     die("Database connection failed: " . $e->getMessage());
 }
 
-// Initialize variables
+
 $message = "";
 
-// Admin login check
+
 $isAdmin = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
 
-// Handle logout
+
 if (isset($_GET['logout'])) {
     session_unset();
     session_destroy();
@@ -28,32 +28,37 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
-// Handle admin login
+
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $inputUsername = $_POST['username'];
-    $inputPassword = md5($_POST['password']);
-
-    $stmt = $pdo->prepare("SELECT * FROM admin WHERE username = :username AND password = :password");
-    $stmt->execute([':username' => $inputUsername, ':password' => $inputPassword]);
+    $inputPassword = $_POST['password'];
+    $stmt = $pdo->prepare("SELECT * FROM admin WHERE username = :username");
+    $stmt->execute([':username' => $inputUsername]);
     $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 
     if ($admin) {
-        $_SESSION['admin_logged_in'] = true;
-        $_SESSION['admin_id'] = $admin['id'];
-        header("Location: admin.php");
-        exit;
+        
+        if (password_verify($inputPassword, $admin['password'])) {
+            
+            $_SESSION['admin_logged_in'] = true;
+            $_SESSION['admin_id'] = $admin['id'];
+            header("Location: admin.php");
+            exit;
+        } else {
+            
+            $message = "Invalid username or password.";
+        }
     } else {
+       
         $message = "Invalid username or password.";
     }
 }
 
-// Redirect to login if not logged in
 if (!$isAdmin && basename($_SERVER['PHP_SELF']) !== 'admin.php') {
     header("Location: admin.php");
     exit;
 }
 
-// Handle admin password change
 if ($isAdmin && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_password'])) {
     $currentPassword = md5($_POST['current_password']);
     $newPassword = md5($_POST['new_password']);
@@ -76,7 +81,6 @@ if ($isAdmin && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_pas
     }
 }
 
-// Handle admin username change
 if ($isAdmin && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_username'])) {
     $newUsername = $_POST['new_username'];
 
@@ -93,7 +97,6 @@ if ($isAdmin && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_use
     }
 }
 
-// Handle adding a new room type
 if ($isAdmin && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_room'])) {
     $roomType = $_POST['room_type'];
     $maxRooms = $_POST['max_rooms'];
@@ -120,7 +123,6 @@ if ($isAdmin && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_room']
     }
 }
 
-// Handle updating room price
 if ($isAdmin && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_room_price'])) {
     $roomType = $_POST['room_type'];
     $pricePerNight = $_POST['price_per_night'];
@@ -137,7 +139,6 @@ if ($isAdmin && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_roo
     $message = "Room price updated successfully!";
 }
 
-// Handle adding payment method
 if ($isAdmin && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_payment_method'])) {
     $methodName = $_POST['method_name'];
 
@@ -146,7 +147,6 @@ if ($isAdmin && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_paymen
     $message = "Payment method added successfully!";
 }
 
-// Handle removing payment method
 if ($isAdmin && isset($_GET['delete_payment_method'])) {
     $methodId = $_GET['delete_payment_method'];
 
@@ -155,7 +155,6 @@ if ($isAdmin && isset($_GET['delete_payment_method'])) {
     $message = "Payment method deleted successfully!";
 }
 
-// Handle removing booking with pending status
 if ($isAdmin && isset($_GET['delete_booking'])) {
     $bookingId = $_GET['delete_booking'];
     
@@ -179,7 +178,6 @@ if ($isAdmin && isset($_GET['delete_room'])) {
     } 
 }
 
-// Fetch all data
 $stmt = $pdo->prepare("SELECT * FROM rooms");
 $stmt->execute();
 $rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -210,7 +208,7 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard</title>
     <style>
-        /* General Styles */
+    
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
@@ -219,7 +217,7 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
             color: #333;
         }
 
-        /* Header */
+      
         header {
             background-color: #222;
             color: white;
@@ -232,7 +230,7 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
             margin: 0;
         }
 
-        /* Admin Panel */
+       
         .admin-panel {
             background-color: white;
             padding: 20px;
@@ -289,7 +287,7 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
             background-color: #218838;
         }
 
-        /* Tables with Lines */
+       
         table {
             width: 100%;
             border-collapse: collapse;
@@ -311,7 +309,7 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
             background-color: white;
         }
 
-        /* Message Area */
+       
         #message {
             color: green;
             font-size: 1.1em;
@@ -344,7 +342,6 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <h1>Admin Dashboard</h1>
         <div class="sub-header">
             <?php if ($isAdmin): ?>
-                <!-- Admin Logout Link -->
                 <button type="button"><a href="admin.php?logout=true">Logout</a></button>
             <?php endif; ?>
         </div>
@@ -352,7 +349,7 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     <div class="container">
         <?php if (!$isAdmin): ?>
-            <!-- Admin Login Form -->
+           
             <div class="login-container" id="login-form">
                 <h2>Admin Login</h2>
                 <form method="POST">
@@ -365,11 +362,10 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 <p class="error"><?= $message ?></p>
             </div>
         <?php else: ?>
-            <!-- Admin Panel (if logged in as admin) -->
+            
             <div class="admin-panel">
                 <h1>Admin Dashboard</h1>
 
-                <!-- Change Username Form -->
                 <form method="POST">
                     <h2>Change Username</h2>
                     <label for="new_username">New Username:</label>
@@ -377,7 +373,6 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <button type="submit" name="change_username">Change Username</button>
                 </form>
 
-                <!-- Change Password Form -->
                 <form method="POST">
                     <h2>Change Password</h2>
                     <label for="current_password">Current Password:</label>
@@ -389,7 +384,6 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <button type="submit" name="change_password">Change Password</button>
                 </form>
 
-                <!-- Add New Room Type Form -->
                 <form method="POST">
                     <h2>Add New Room Type</h2>
                     <label for="room_type">Room Type:</label>
@@ -401,7 +395,6 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <button type="submit" name="add_room">Add Room Type</button>
                 </form>
 
-                <!-- Update Room Price Form -->
                 <form method="POST">
                     <h2>Update Room Price</h2>
                     <label for="room_type">Room Type:</label>
@@ -417,7 +410,6 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <button type="submit" name="update_room_price">Update Room Price</button>
                 </form>
 
-                <!-- Add Payment Method Form -->
                 <form method="POST">
                     <h2>Add Payment Method</h2>
                     <label for="method_name">Payment Method Name:</label>
@@ -425,7 +417,6 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <button type="submit"  name="add_payment_method">Add Payment Method</button>
                 </form>
 
-                <!-- Payment Methods Table -->
                 <h2>Payment Methods</h2>
                 <table>
                     <tr>
@@ -444,7 +435,6 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php endforeach; ?>
                 </table>
 
-                <!-- Filter and Sort Bookings Form -->
                 <form method="GET" action="admin.php">
                     <h2>Filter and Sort Bookings</h2>
                     <label for="room_type">Room Type:</label>
@@ -480,7 +470,7 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <td><?= htmlspecialchars($room['room_type']) ?></td>
                             <td><?= htmlspecialchars($room['max_rooms']) ?></td>
                             
-                            <td><?= htmlspecialchars($room['available_rooms']) ?></td> <!-- New Column -->
+                            <td><?= htmlspecialchars($room['available_rooms']) ?></td> 
                             <td>$<?= htmlspecialchars($room['price_per_night']) ?></td>
                             <td>
                                 <button type="button">
@@ -491,7 +481,7 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php endforeach; ?>
                 </table>
 
-                <!-- Bookings Table -->
+                
                 <h2>Bookings</h2>
                 <table>
                     <tr>
@@ -502,7 +492,7 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                         <th>Room Details</th>
                         <th>Total Payment</th>
                         <th>Payment Status</th>
-                        <th>Payment Method</th> <!-- New Column -->
+                        <th>Payment Method</th> 
                         <th>Action</th>
                     </tr>
                     <?php foreach ($bookings as $booking): ?>
@@ -523,7 +513,7 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </td>
                             <td>$<?= htmlspecialchars($booking['total_payment']) ?></td>
                             <td><?= htmlspecialchars($booking['payment_status']) ?></td>
-                            <td><?= htmlspecialchars($booking['payment_method']) ?></td> <!-- New Column -->
+                            <td><?= htmlspecialchars($booking['payment_method']) ?></td> 
                             <td>
                                 <?php if ($booking['payment_status'] === 'pending'): ?>
                                     <button type="button">
@@ -537,7 +527,6 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php endforeach; ?>
                 </table>
 
-                <!-- User Comments Table -->
                 <h2>User Comments</h2>
                 <table>
                     <tr>
@@ -562,7 +551,7 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <?php endforeach; ?>
                 </table>
 
-                <!-- Message Display -->
+                
                 <p id="message"><?= $message ?></p>
             </div>
         <?php endif; ?>
