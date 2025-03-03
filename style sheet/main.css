@@ -9,13 +9,21 @@ body {
 }
 
 h1 {
+    margin: 0;
+    padding: 50px 0 15px;
+    font-size: 45px;
     text-align: center;
-    color: #ffffff;
+    
 }
 
 p {
+    font-weight: 500;
+    font-size: 20px;
     text-align: center;
-    color: #ffffff;
+}
+
+.header-list a {
+    text-decoration: none;
 }
 
 .header-list.active {
@@ -24,19 +32,21 @@ p {
 
 /* Header styling */
 .header {
-    background-color: #8b5cf6;
+    background-color: #5CB338;
     color: rgb(233, 233, 233);
     text-align: center;
-    padding: 5px;
     font-size: 12px;
+}
+.header h1 {
+    padding: 15px 0;
 }
 
 .headers {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: rgb(107, 107, 107);
-    padding: 15px 30px;
+    background-color: #5CB338;
+    padding: 0 30px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -74,11 +84,11 @@ p {
 }
 
 .header-list h1:hover {
-    color: #8b5cf6;
+    color: #A31D1D;
 }
 
 .sub-header button {
-    background-color: #8b5cf6;
+    background-color: #2C3930;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -95,7 +105,7 @@ p {
 }
 
 .sub-header button:hover {
-    background-color: #6a46c1;
+    background-color: #854836;
 }
 
 .list-room, .services {
@@ -112,8 +122,9 @@ p {
     white-space: nowrap;
 }
 
+
 .room-components, .component-of-service {
-    background: rgb(94, 94, 94);
+    background: #EEEEEE;
     padding: 10px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
@@ -135,8 +146,9 @@ p {
 }
 
 .about-us-subdiv {
+    padding-bottom: 100px;
     align-content: space-between;
-    margin: 8px;
+    margin: 0 100px;
 }
 
 .about-us-image {
@@ -144,9 +156,12 @@ p {
 }
 
 .about-us-p {
-    float: left;
-    padding: 8px;
+    float: right;
+    padding: 8px 28px;
     width: 60%;
+}
+.about-us-p p {
+    text-align: left;
 }
 
 .rooms-image, .img-service {
@@ -158,21 +173,29 @@ p {
 
 .title {
     font-size: 15px;
-    color: #f8f8f8;
-    margin-top: 10px;
+    color: #270d0ee5;
 }
 
 /* Sections styling */
-.intro, .about-us, .services, .Hotel-team, .list-room, .contact-us, .guest-rate {
+.intro, .list-room, .Hotel-team, .guest-rate {
     padding: 50px 10%;
-    background-color: rgb(145, 145, 145);
-    margin: 20px 0;
-    border-radius: 10px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff !important;
+    margin:0;
+    
+    
+}
+.about-us, .services, .contact-us {
+    margin: 0;
+    background-color: #f8f9fa !important; 
 }
 
 .Hotel-team {
     text-align: center;
+}
+
+.Hotel-team h1 {
+    padding-top: 20px !important;
+    color: black;
 }
 
 .team-img {
@@ -188,12 +211,17 @@ p {
     border: 3px solid #8b5cf6;
 }
 
+.contact-form {
+    padding-top: 30px;
+    padding-bottom: 70px;
+}
+
 form {
     align-items: center;
     display: flex;
     flex-direction: column;
     gap: 8px;
-    background: rgb(160, 160, 160);
+    background: rgb(248, 247, 252);;
     padding: 30px;
     border-radius: 15px;
     box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
@@ -207,8 +235,6 @@ form input, form textarea {
     border-radius: 8px;
     font-size: 16px;
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    background-color: #999;
-    color: aliceblue;
 }
 
 form input:focus, form textarea:focus {
@@ -223,7 +249,7 @@ form textarea {
 }
 
 form input[type="submit"] {
-    background-color: #8b5cf6;
+    background-color: #347928;
     width: 30%;
     color: white;
     border: none;
@@ -235,7 +261,7 @@ form input[type="submit"] {
 }
 
 form input[type="submit"]:hover {
-    background-color: #6a46c1;
+    background-color: #8FD14F;
     transform: translateY(-2px);
 }
 
@@ -246,7 +272,6 @@ form label {
 }
 
 form input::placeholder, form textarea::placeholder {
-    color: #e9e9e9;
     font-style: italic;
     opacity:50%;
 }
@@ -257,10 +282,11 @@ form input:hover, form textarea:hover {
 
 /* Rating box styling */
 .rating-box {
+    width: 30%;
     display: flex;
     text-align: center;
     padding: 8px 10%;
-    background-color: rgb(164, 164, 164);
+    background-color: rgb(242, 245, 227);
     margin: 10px 0;
     border-radius: 10px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
@@ -277,21 +303,45 @@ form input:hover, form textarea:hover {
 .guest-profile, .comment {
     float: inline-end;
     padding: 8px;
-    font-size: 15px;
+    font-size: 25px;
+    text-align: left !important;
 }
 
 .guest-profile h1 {
+    padding: 15px;
     font-size: 15px;
     font-weight: bolder;
+}
+#topBtn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 10px;
+    font-size: 24px;
+    border: none;
+    border-radius: 50%;
+    background: #333;
+    color: white;
+    cursor: pointer;
+    display: none; 
 }
 
 footer {
     text-align: center;
     padding: 20px;
-    background-color: #333;
+    background-color: #5CB338;
     color: white;
 }
-
+@media (min-width: 769px) {
+    .contact-form {
+        display: grid;
+        place-items: center;
+    }
+    .sub-services {
+        margin-left: 90px;
+        margin-right: 90px;
+    }
+}
 
 @media (max-width: 768px) {
     body {
@@ -377,6 +427,14 @@ footer {
         flex-direction: column;
         align-items: center;
         text-align: center;
+    }
+    .about-us-image, .about-us-p {
+        float: left;
+        text-align: center;
+    }
+    .about-us-p {
+        padding-left: 0;
+        padding-right: 0;
     }
 }
 
