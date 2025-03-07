@@ -251,10 +251,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
 <p>2025 &copy;Copy right Reserved, Luxury Hotel</p>
     </footer>
-    <script>
-        function toggleMenu() {
-            document.querySelector('.header-list').classList.toggle('active');
-        }
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>

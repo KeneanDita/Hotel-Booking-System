@@ -108,6 +108,15 @@ p {
     background-color: #854836;
 }
 
+.intro {
+    position: relative;
+    padding: 150px;
+    text-align: center;
+    color: white;
+    z-index: 1;
+}
+
+
 .list-room, .services {
     text-align: center;
     padding: 40px 20px;
@@ -177,7 +186,7 @@ p {
 }
 
 /* Sections styling */
-.intro, .list-room, .Hotel-team, .guest-rate {
+.list-room, .Hotel-team, .guest-rate {
     padding: 50px 10%;
     background-color: #ffffff !important;
     margin:0;
@@ -415,7 +424,7 @@ footer {
         width: 45%;
     }
 
-    .intro, .about-us, .services, .Hotel-team, .list-room, .contact-us, .guest-rate {
+    .about-us, .services, .Hotel-team, .list-room, .contact-us, .guest-rate {
         padding: 30px 5%;
     }
 
