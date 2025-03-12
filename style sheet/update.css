@@ -1,0 +1,118 @@
+body {
+    margin: 0;
+    padding: 0;
+}
+.header {  
+    background-color: #5CB338;
+    text-align: center;
+    padding: 15px;
+}
+.header h1, .header h2 {
+    padding-bottom: 5px;
+    margin: 0;
+}
+.back-button {
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+.back-button button {
+    background-color: #213555;
+    color: white;
+    padding: 7px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.5s ease;
+}
+.back-button button:hover {
+    background-color: black;
+    color: #fafafa;
+}
+.container { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    margin: 20px; 
+}
+.toggle-buttons { 
+    margin-bottom: 15px; 
+    display: flex; 
+    flex-wrap: wrap; 
+    justify-content: center; 
+    gap: 10px; 
+}
+.toggle-buttons button {
+     background: #5CB338; 
+     color: white; 
+     padding: 10px 20px; 
+     font-size: 1rem; 
+     cursor: pointer; 
+     border-radius: 5px; 
+     border: none; 
+    }
+.toggle-buttons button:hover { 
+    background: #143506; 
+}
+.form-section { 
+    background: #fafafa;
+    margin-bottom: 40px; 
+    padding: 20px; 
+    border-radius: 10px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%; 
+    max-width: 400px; 
+    display: none; 
+} 
+.update {
+    margin-bottom: 85px;
+}
+.update input {
+    padding: 10px 7px !important;
+}
+.update-form {
+    display: block;
+}
+form { 
+    display: flex; 
+    flex-direction: column; 
+    gap: 10px; 
+}
+label { 
+    font-weight: bold; 
+    text-align: left; 
+}
+input, select { 
+    padding: 10px; 
+    border: 1px solid #ddd; 
+    border-radius: 5px; 
+    font-size: 1rem; 
+    width: 100%; 
+}
+button { 
+    background: #5CB338; 
+    color: white; 
+    padding: 12px; 
+    font-size: 1rem; 
+    cursor: pointer; 
+    border-radius: 5px; 
+    border: none; 
+    transition: 0.5s ease;
+}
+button:hover { 
+    background-color: black;
+    color: #fafafa; 
+} 
+.footer {
+    background-color: #5CB338;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    padding: 15px;
+}
+.footer p {
+    font-size: 1.1em;
+    color: white;
+}

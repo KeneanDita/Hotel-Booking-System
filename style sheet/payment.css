@@ -1,0 +1,103 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+.header {
+    background-color: #5CB338;
+    text-align: center;
+    padding: 20px;
+    color: white;
+}
+.header h1, .header h2 {
+    padding-bottom: 10px;
+}
+.header .back-button {
+    padding: 5px 0 10px 0;
+}
+.back-button button {
+    background-color: #2C3930;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 1.1em;
+    cursor: pointer;
+}
+.container {
+    width: 35%;
+    margin: 20px auto;
+    background-color: #fafafa;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+}
+.sub-container h1 {
+    text-align: center;
+    padding-top: 15px;
+    font-size: 23px;
+}
+.sub-container .booking-id {
+    padding: 15px 0 8px 30px;
+}
+.sub-container form {
+    padding: 0 0 15px 0;
+}
+.sub-container #paymentDetails {
+    padding-left: 30px;
+}
+#paymentDetails p , #paymentDetails h3 {
+    padding-bottom: 8px;
+}
+.sub-container label {
+    padding: 0 0 15px 30px;
+}
+.sub-container select {
+    margin-top: 10px;
+    margin-left: 30px;
+    display: block;
+    padding: 10px 70px;
+    border-radius: 5px;
+}
+.btn {
+    text-align: center;
+    /* padding-left: 15px; */
+    padding-top: 20px;
+}
+.btn button {
+    background-color: #2C3930;
+    padding: 8px 15px;
+    font-size: 1.1em;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.cancel-btn {
+    text-align: center;
+    padding-top: 13px;
+    padding-bottom: 15px;
+}
+.cancel-btn button {
+    background-color: #2C3930;
+    padding: 8px 15px;
+    font-size: 1.1em;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.error {
+    color: red;
+    font-size: 0.9rem;
+}
+.footer {
+    background-color: #5CB338;
+    padding: 20px;
+    text-align: center;
+    font-size: 1.1em;
+}
+@media (max-width: 769px) {
+    .container {
+        width: 85%;
+    }
+}

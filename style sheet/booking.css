@@ -1,0 +1,101 @@
+ body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    
+   
+ }
+ .container {
+    width: 400px;
+    margin: 10px auto;
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+  
+         
+.sub-container{
+    width: 100%;
+}
+
+.header h1, .header h2 {
+    margin-left: 50px;
+    text-align: center;
+    color: #ffffff;
+}
+
+p {
+    text-align: center;
+    color: #ffffff;
+} 
+.header-btn {
+    display: flex;
+}
+ .back-button, .update-button {
+    display: flex;
+    right: 5px;
+    top: 20px;
+    margin: 20px 20px;
+    cursor: pointer;
+}  
+.header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    background-color: #5cb338;
+    color: rgb(233, 233, 233);
+    text-align: center;
+    padding: 5px;
+    font-size: 12px;
+} 
+
+.header button {
+    width: 100%;
+    background-color: #213555;
+    padding: 10px 15px;
+    transition: background-color 0.3s ease;
+}
+
+input, select, button ,textarea{
+    width: 100%;
+    padding: 12px 0 12px 12px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+} 
+
+ button {
+    background: #5CB338;
+    color: white;
+    font-size: 14px;
+    cursor: pointer;
+    border: none;
+    transition: 0.3s;
+} 
+.book-btn button {
+    margin-top: 0 !important;
+}
+
+button:hover {
+    background: #3A7D44;
+ } 
+ .error-message {
+    color: red;
+    font-size: 12px;
+ }
+
+ .footer {
+    background-color: #5CB338;
+ }
+ .footer p {
+    padding: 20px;
+    margin: 0;
+ }
+ @media (max-width: 700px) {
+    .back-button button, .update-button button {
+        font-size: 10px !important;
+        padding: 5px 10px;
+    }
+ }

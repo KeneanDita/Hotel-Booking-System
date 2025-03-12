@@ -1,0 +1,345 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+.header {
+    padding: 15px;
+    background-color: #5CB338;
+    text-align: center;
+}
+.sub-header button {
+    background-color: #2C3930 !important;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 30px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.sub-header button:hover {
+    background-color: #854836 !important;
+}
+.container .login-container {
+    background-color:  #fafafa;
+    border: 1px solid;
+    padding: 50px;
+    margin: 7px auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 300px;
+}
+.login-container h2 {
+    padding: 25px;
+}
+
+.login-container label {
+    display: block;
+    padding-bottom: 15px;
+}
+
+.login-container input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.login-btn {
+    padding-top: 10px;
+}
+.login-container button {
+    margin-left: 70px;
+    width: 40%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.login-container button:hover {
+    background-color: #0056b3;
+}
+.change {
+    display: flex;
+    gap: 85px;
+    width: 65%;
+    margin: 30px auto;
+}
+.change .change-username, .change .change-password {
+    background-color: #fafafa;
+    padding: 0 60px;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+    border: none;
+    border-radius: 5px;
+}
+.change .change-username {
+    padding-top: 80px;
+}
+.change h2 {
+    text-align: center;
+}
+.change-username label, .change-password label {
+    display: block;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    font-size: 1.1em;
+}
+.change-username input, .change-password input {
+    padding: 10px  70px;
+    border: 1px solid;
+    border-radius: 5px;
+}
+.change-username .change-btn, .change-password .change-btn {
+    margin: 20px 45px;
+    
+}
+.change-username button, .change-password button {
+    display: block;
+    background-color: #007bff;
+    font-size: 1.1em;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.change-btn button:hover {
+    background-color: #0056b3;
+}
+.add {
+    display: flex;
+    width: 85%;
+    gap: 40px;
+    margin: 50px auto;
+}
+.add .add-room, .add .add-price, .add .add-method {
+    background-color: #fafafa;
+    padding: 5px 25px;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+}
+.add h2 {
+    text-align: center;
+    padding: 15px 0;
+}
+
+.add-method label, .add-price label, .add-room label {
+    display: block;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    font-size: 1.1em;
+}
+.add-room input, .add-method input, .add-price input {
+    padding: 10px  65px;
+    border-radius: 5px;
+    border: 1px solid;
+}
+.add-price select {
+    padding: 10px 130px;
+    border-radius: 5px;
+    border: 1px solid;
+}
+.add-room .add-btn, .add-price .add-btn, .add-method .add-btn {
+    padding: 20px 60px 40px 60px;
+}
+.add-btn button {
+    background-color: #007bff;
+    padding: 10px 20px;
+    font-size: 1.1em;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.add-btn button:hover {
+    background-color: #0056b3;
+}
+table {
+    width: 100%;
+}
+th {
+    padding: 12px !important;
+    background-color: #e9eef3;
+    color: #555;
+}
+td {
+    background-color: white;
+}
+.filter-method {
+    display: flex;
+    width: 70%;
+    margin: 0 auto 30px;
+    gap: 40px;
+}
+.payment-method, .filter {
+    width: 50%;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+    background-color: #fafafa;
+}
+.method-table table, .method-table td, .method-table th {
+    border: 1px solid #ddd;
+    text-align: left;
+    padding: 5px;
+}
+.payment-method h2, .filter h2 {
+    text-align: center;
+}
+.btn button {
+    background-color: #ff3705;
+    padding: 5px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+}
+.btn button:hover {
+    background-color: #be300d;
+}
+.filter-title, .method-title {
+    background-color: #52f10d;
+    padding: 2px 0;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+.filter {
+    max-height: 325px;
+}
+.filter-form {
+    padding-left: 70px;
+}
+.filter-form label {
+    display: block;
+    padding: 13px 0 13px 0;
+    font-size: 1.1em;
+}
+.filter-form select {
+    display: block;
+    padding: 10px 50px;
+    border-width: 1px;
+    border-radius: 5px;
+}
+.filter-btn {
+    padding: 20px;
+}
+.filter-btn button {
+    background-color: #007bff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+}
+.filter-btn button:hover {
+    background-color: #0056b3;
+}
+.room {
+    width: 85%;
+    margin: 5px auto;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+}
+.room .room-title {
+    background-color: #52f10d;
+    padding: 2px 0;
+    text-align: center;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+.room-table {
+    background-color: #fafafa;  
+}
+.room-table table, .room-table td, .room-table th {
+    border: 1px solid #ddd;
+    text-align: left;
+    padding: 5px;
+}
+.booking {
+    margin: 40px auto;
+    width: 95%;
+    border-radius: 5px;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+}
+.booking .booking-title {
+    background-color: #52f10d;
+    padding: 2px 0;
+    text-align: center;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+.booking .booking-table {
+    background-color: #fafafa;
+}
+.booking-table table, .booking-table td, .booking-table th {
+    border: 1px solid #ddd;
+    font-size: 12.5px;
+    text-align: left;
+    padding: 5px 2px 5px 2px;
+}
+.comment {
+    width: 90%;
+    margin: 5px auto;
+    border-radius: 5px;
+    box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.3);
+}
+.comment .comment-title {
+    background-color: #52f10d;
+    padding: 2px 0;
+    text-align: center;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+}
+.comment .comment-table {
+    background-color: #fafafa;
+}
+.comment-table table, .comment-table td, .comment-table th {
+    border: 1px solid #ddd;
+    text-align: left;
+    padding: 8px;
+}
+#message {
+    color: green;
+    font-size: 1.1em;
+    margin-top: 15px;
+}
+footer {
+    padding: 15px;
+    text-align: center;
+    background-color: #5CB338;
+}
+@media (max-width: 768px) {
+    body {
+        margin: 0;
+    }
+    .change {
+        display: flex;
+        flex-direction: column;  
+    }
+    .add {
+        display: flex;
+        flex-direction: column;
+        width: 65%;
+        margin: 30px auto;
+    }
+    .filter-method {
+        width: 65%;
+        display: flex;
+        flex-direction: column;
+    }
+    .payment-method, .filter {
+        width: 100%;
+    }
+    .booking {
+        width: 100%;
+    }
+    .booking-table table, .booking-table td, .booking-table th {
+        font-size: 0.7em;
+    }
+    .comment-table table, .comment-table td, .comment-table th {
+        font-size: 0.8em;
+    }
+}
