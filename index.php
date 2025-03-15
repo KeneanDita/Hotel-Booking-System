@@ -1,19 +1,19 @@
 
 <?php
-// Database connection
+
 $host = 'localhost';
 $dbname = 'hotel_booking';
 $username = 'root';
 $password = '';
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+
+$conn = new mysqli($host, $username, $password, $dbname);
+
+
+if ($conn->connect_error) {
+    die("Database connection failed: " . $conn->connect_error);
 }
 
-// Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $full_name = htmlspecialchars($_POST['name'] ?? '');
     $email = htmlspecialchars($_POST['c_email'] ?? '');
@@ -21,34 +21,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $comment = htmlspecialchars($_POST['comment'] ?? '');
     $additional_message = htmlspecialchars($_POST['additional'] ?? '');
 
-    // Validate required fields
     if (empty($full_name) || empty($email) || empty($phone)) {
         die("Name, email, and phone are required fields.");
     }
 
-    // Insert data into the database
     try {
-        $stmt = $pdo->prepare("
+        $stmt = $conn->prepare("
             INSERT INTO user_comments (full_name, email, phone, comment, additional_message)
-            VALUES (:full_name, :email, :phone, :comment, :additional_message)
+            VALUES (?, ?, ?, ?, ?)
         ");
 
-        $stmt->execute([
-            ':full_name' => $full_name,
-            ':email' => $email,
-            ':phone' => $phone,
-            ':comment' => $comment,
-            ':additional_message' => $additional_message
-        ]);
+        if ($stmt === false) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
 
-        echo "Thank you for your comment!";
-    } catch (PDOException $e) {
+        $stmt->bind_param("sssss", $full_name, $email, $phone, $comment, $additional_message);
+
+        if (!$stmt->execute()) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+
+        echo "<script>alert('Thank you for your comment!');</script>";
+    } catch (Exception $e) {
         die("Error saving your comment: " . $e->getMessage());
+    } finally {
+        $stmt->close();
+        $conn->close();
     }
 }
 ?>
 
-<!-- Your existing HTML form for comments -->
+
  <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -113,27 +116,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="list-of-rooms">
             <div class="room-components"><img src="images/pexels-aftabmirza-30761844.jpg" alt="" class="rooms-image">
             <h1 class="title">Standard Room</h1><br><div class="sub-header">
-                <button>Book Rooms</button>
+               
             </div></div>
             <div class="room-components"><img src="images/pexels-cottonbro-6466285.jpg" alt="" class="rooms-image">
                 <h1 class="title">Deluxe Room</h1><br><div class="sub-header">
-                    <button>Book Rooms</button>
+                   
                 </div></div>
             <div class="room-components"><img src="images/pexels-aksinfo7-30808019.jpg" alt="" class="rooms-image">
                 <h1 class="title">Suite</h1> <br><div class="sub-header">
-                    <button>Book Rooms</button>
+                   
                 </div></div>
             <div class="room-components"><img src="images/pexels-olly-3139124.jpg" alt="" class="rooms-image">
                 <h1 class="title">Family Room</h1><br><div class="sub-header">
-                    <button>Book Rooms</button>
+                   
                 </div></div>
             <div class="room-components"><img src="images/pexels-pixabay-271624.jpg" alt="" class="rooms-image">
                 <h1 class="title">Executive Room</h1><br><div class="sub-header">
-                    <button>Book Rooms</button>
+                   
                 </div></div>
             <div class="room-components"><img src="images/pexels-rana-matloob-hussain-733235258-26886879.jpg" alt="" class="rooms-image">
                 <h1 class="title">Presidential Suite </h1><br><div class="sub-header">
-                    <button>Book Rooms</button>
+                   
                 </div></div>
         </div>
     </div>
@@ -241,7 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 
     <footer>
-<p>2025 &copy;Copy right Reserved, Luxury Hotel</p>
+<p>2025 &copy; Copy right Reserved, Luxury Hotel</p>
     </footer>
     <script src="script.js"></script>
 </body>

@@ -6,94 +6,76 @@ $dbname = 'hotel_booking';
 $username = 'root';
 $password = '';
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
-}
+$conn = new mysqli($host, $username, $password, $dbname);
 
+if ($conn->connect_error) {
+    die("Database connection failed: " . $conn->connect_error);
+}
 
 if (!isset($_GET['booking_id'])) {
     die("Invalid booking ID.");
 }
 $bookingId = $_GET['booking_id'];
 
+$stmt = $conn->prepare("SELECT * FROM bookings WHERE booking_id = ?");
+$stmt->bind_param("s", $bookingId);
+$stmt->execute();
+$result = $stmt->get_result();
+$booking = $result->fetch_assoc();
 
-try {
-    $stmt = $pdo->prepare("SELECT * FROM bookings WHERE booking_id = :booking_id");
-    $stmt->execute([':booking_id' => $bookingId]);
-    $booking = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$booking) {
-        die("Booking not found.");
-    }
-} catch (PDOException $e) {
-    die("Error fetching booking details: " . $e->getMessage());
+if (!$booking) {
+    die("Booking not found.");
 }
 
-
-try {
-    $stmt = $pdo->query("SELECT * FROM payment_methods");
-    $paymentMethods = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Error fetching payment methods: " . $e->getMessage());
-}
-
+$stmt = $conn->prepare("SELECT * FROM payment_methods");
+$stmt->execute();
+$result = $stmt->get_result();
+$paymentMethods = $result->fetch_all(MYSQLI_ASSOC);
 
 $rooms = json_decode($booking['room_details'], true);
 $totalPayment = 0;
 
 foreach ($rooms as $room) {
-    
-    $stmt = $pdo->prepare("SELECT price_per_night FROM rooms WHERE room_type = :room_type");
-    $stmt->execute([':room_type' => $room['roomType']]);
-    $roomPrice = $stmt->fetchColumn();
+    $stmt = $conn->prepare("SELECT price_per_night FROM rooms WHERE room_type = ?");
+    $stmt->bind_param("s", $room['roomType']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $roomPrice = $result->fetch_column();
 
     if (!$roomPrice) {
         die("Price not found for room type: " . $room['roomType']);
     }
 
-    
     $checkIn = new DateTime($room['checkIn']);
     $checkOut = new DateTime($room['checkOut']);
     $interval = $checkIn->diff($checkOut);
     $numberOfDays = $interval->days;
 
-   
     $totalPayment += ($roomPrice * $room['numRooms'] * $numberOfDays);
 }
 
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['confirmPayment'])) {
-    $paymentMethod = $_POST['payment_method']; 
+    $paymentMethod = $_POST['payment_method'];
 
     try {
-       
-        $pdo->beginTransaction();
+        $conn->begin_transaction();
 
-        
-        $stmt = $pdo->prepare("
+        $stmt = $conn->prepare("
             UPDATE bookings 
             SET payment_status = 'confirmed', 
-                total_payment = :total_payment, 
-                payment_method = :payment_method 
-                
-            WHERE booking_id = :booking_id
+                total_payment = ?, 
+                payment_method = ? 
+            WHERE booking_id = ?
         ");
-        $stmt->execute([
-            ':total_payment' => $totalPayment,
-            ':payment_method' => $paymentMethod,
-            ':booking_id' => $bookingId
-        ]);
+        $stmt->bind_param("dss", $totalPayment, $paymentMethod, $bookingId);
+        $stmt->execute();
 
-
-        $pdo->commit();
+        $conn->commit();
 
         header("Location: index.php");
         exit;
-    } catch (PDOException $e) {
-        $pdo->rollBack();
+    } catch (Exception $e) {
+        $conn->rollback();
         die("Error processing payment: " . $e->getMessage());
     }
 }

@@ -1,25 +1,27 @@
 <?php
 session_start();
 
-
 $host = 'localhost';
 $dbname = 'hotel_booking';
 $username = 'root';
 $password = '';
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+$conn = new mysqli($host, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Database connection failed: " . $conn->connect_error);
 }
 
-// Initialize variables
-$nameError = $emailError = $phoneError = $message = "";
-$name = $email = $phone ="";
-$roomTypesInput = $numRooms = $checkIns = $checkOuts = []; 
+$roomTypes = [];
+$stmt = $conn->prepare("SELECT room_type FROM rooms");
+$stmt->execute();
+$result = $stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+    $roomTypes[] = $row['room_type'];
+}
 
-// Handle form submission
+$nameError = $emailError = $phoneError = $message = "";
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $name = htmlspecialchars($_POST['name'] ?? '');
     $email = htmlspecialchars($_POST['email'] ?? '');
@@ -29,26 +31,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $checkIns = $_POST['checkIn'] ?? [];
     $checkOuts = $_POST['checkOut'] ?? [];
 
-    // Validate inputs
     if (empty($name)) $nameError = "Name is required";
-    if (empty($phone)) $phoneError = "<span class='error-message'>Phone number is required</span>";
-    elseif (!preg_match('/^[0-9]{10}$/', $phone)) $phoneError = "<span class='error-message'>Invalid phone number format. It should be 10 digits.</span>";
-    if (empty($email)) $emailError = "<span class='error-message'>Email is required</span>";
+    if (empty($phone)) $phoneError = "Phone number is required";
+    elseif (!preg_match('/^[0-9]{10}$/', $phone)) $phoneError = "Invalid phone number format. It should be 10 digits.";
+    if (empty($email)) $emailError = "Email is required";
     elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) $emailError = "Please enter a valid email format";
 
-    // Check room availability
     $isAvailable = true;
     $availabilityErrors = [];
     foreach ($roomTypesInput as $index => $roomType) {
         $requiredRooms = (int)$numRooms[$index];
 
-        // Query the database to check available rooms
-        $stmt = $pdo->prepare("SELECT available_rooms FROM rooms WHERE room_type = :room_type");
-        $stmt->execute([':room_type' => $roomType]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt = $conn->prepare("SELECT available_rooms FROM rooms WHERE room_type = ?");
+        $stmt->bind_param("s", $roomType);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
 
         if ($row && $row['available_rooms'] >= $requiredRooms) {
-            // Room is available
         } else {
             $isAvailable = false;
             $availabilityErrors[] = "Not enough $roomType rooms available. Only " . ($row['available_rooms'] ?? 0) . " left.";
@@ -58,8 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!$isAvailable) {
         $message = implode("<br>", $availabilityErrors);
     } else {
-        // Prepare room details
-        if (empty($nameError) && empty($emailError) && empty($phoneError) && empty($message)) {$rooms = [];
+        $rooms = [];
         foreach ($roomTypesInput as $index => $roomType) {
             $rooms[] = [
                 'roomType' => $roomType,
@@ -69,51 +68,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ];
         }
 
-        // Generate a unique booking ID
         $bookingId = 'BOOK' . uniqid();
 
-        // Insert booking into the database
         try {
-            $pdo->beginTransaction();
+            $conn->begin_transaction();
 
-            // Insert booking
-            $stmt = $pdo->prepare("
+            $stmt = $conn->prepare("
                 INSERT INTO bookings (booking_id, name, email, phone, room_details)
-                VALUES (:booking_id, :name, :email, :phone, :room_details)
+                VALUES (?, ?, ?, ?, ?)
             ");
-            $stmt->execute([
-                ':booking_id' => $bookingId,
-                ':name' => $name,
-                ':email' => $email,
-                ':phone' => $phone,
-                ':room_details' => json_encode($rooms),
-            ]);
+            $stmt->bind_param("sssss", $bookingId, $name, $email, $phone, json_encode($rooms));
+            $stmt->execute();
 
-            // Update room availability
             foreach ($roomTypesInput as $index => $roomType) {
                 $requiredRooms = (int)$numRooms[$index];
-                $stmt = $pdo->prepare("
+                $stmt = $conn->prepare("
                     UPDATE rooms
-                    SET available_rooms = available_rooms - :required_rooms
-                    WHERE room_type = :room_type
+                    SET available_rooms = available_rooms - ?
+                    WHERE room_type = ?
                 ");
-                $stmt->execute([
-                    ':required_rooms' => $requiredRooms,
-                    ':room_type' => $roomType
-                ]);
+                $stmt->bind_param("is", $requiredRooms, $roomType);
+                $stmt->execute();
             }
 
-            $pdo->commit();
+            $conn->commit();
 
-            // Redirect to payment page
-            header("Location:payment.php?booking_id=$bookingId");
+            header("Location: payment.php?booking_id=$bookingId");
             exit;
-        } catch (PDOException $e) {
-            $pdo->rollBack();
+        } catch (Exception $e) {
+            $conn->rollback();
             die("Error saving booking: " . $e->getMessage());
         }
     }
-}
 }
 ?>
 
@@ -124,7 +110,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Room Booking</title>
     <link rel="stylesheet" href="style sheet/booking.css">
-      <!-- <link rel="stylesheet" href="tyr.css">   -->
+      
 </head>
 <body>
     <div class="header"> <div>
@@ -186,7 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                 <button type="button" id="addRoom">Add More Rooms</button>
 
-                <!-- <p id="availability"><span class="error">*<?php echo $message ?></span></p> -->
+                 <p id="availability"><span class="error">*<?php echo $message ?></span></p> 
 
                 <button class="book-btn" type="submit">Book Now</button>
             </form>
@@ -208,14 +194,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             newRoom.classList.add("room");
             newRoom.innerHTML = `
                 <label for="roomType${roomCount}">Room Type:</label>
-                <select id="roomType${roomCount}" name="roomType[]">
-                    <option value="Standard">Standard</option>
-                    <option value="Deluxe">Deluxe</option>
-                    <option value="Family">Family</option>
-                    <option value="Suite">Suite</option>
-                    <option value="Executive">Executive</option>
-                    <option value="Presidential">Presidential</option>
-                </select>
+                <select id="roomType1" name="roomType[]">
+                            <?php foreach ($roomTypes as $roomType): ?>
+                                <option value="<?php echo htmlspecialchars($roomType); ?>">
+                                    <?php echo htmlspecialchars($roomType); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+
 
                 <label for="numRooms${roomCount}">Number of Rooms:</label>
                 <input type="number" id="numRooms${roomCount}" name="numRooms[]" min="1" value="1">

@@ -1,25 +1,20 @@
 <?php
 session_start();
 
-
 $host = 'localhost';
 $dbname = 'hotel_booking';
 $username = 'root';
 $password = '';
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
-}
+$conn = new mysqli($host, $username, $password, $dbname);
 
+if ($conn->connect_error) {
+    die("Database connection failed: " . $conn->connect_error);
+}
 
 $message = "";
 
-
 $isAdmin = isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true;
-
 
 if (isset($_GET['logout'])) {
     session_unset();
@@ -28,28 +23,26 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
-
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $inputUsername = $_POST['username'];
     $inputPassword = $_POST['password'];
-    $stmt = $pdo->prepare("SELECT * FROM admin WHERE username = :username");
-    $stmt->execute([':username' => $inputUsername]);
-    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $stmt = $conn->prepare("SELECT * FROM admin WHERE username = ?");
+    $stmt->bind_param("s", $inputUsername);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $admin = $result->fetch_assoc();
 
     if ($admin) {
-        
         if (password_verify($inputPassword, $admin['password'])) {
-            
             $_SESSION['admin_logged_in'] = true;
             $_SESSION['admin_id'] = $admin['id'];
             header("Location: admin.php");
             exit;
         } else {
-            
             $message = "Invalid username or password.";
         }
     } else {
-       
         $message = "Invalid username or password.";
     }
 }
@@ -64,14 +57,17 @@ if ($isAdmin && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_pas
     $newPassword = md5($_POST['new_password']);
     $confirmPassword = md5($_POST['confirm_password']);
 
-    $stmt = $pdo->prepare("SELECT password FROM admin WHERE id = :id");
-    $stmt->execute([':id' => $_SESSION['admin_id']]);
-    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt = $conn->prepare("SELECT password FROM admin WHERE id = ?");
+    $stmt->bind_param("i", $_SESSION['admin_id']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $admin = $result->fetch_assoc();
 
     if ($admin['password'] === $currentPassword) {
         if ($newPassword === $confirmPassword) {
-            $stmt = $pdo->prepare("UPDATE admin SET password = :password WHERE id = :id");
-            $stmt->execute([':password' => $newPassword, ':id' => $_SESSION['admin_id']]);
+            $stmt = $conn->prepare("UPDATE admin SET password = ? WHERE id = ?");
+            $stmt->bind_param("si", $newPassword, $_SESSION['admin_id']);
+            $stmt->execute();
             $message = "Password changed successfully!";
         } else {
             $message = "New password and confirm password do not match.";
@@ -84,15 +80,18 @@ if ($isAdmin && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_pas
 if ($isAdmin && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['change_username'])) {
     $newUsername = $_POST['new_username'];
 
-    $stmt = $pdo->prepare("SELECT * FROM admin WHERE username = :username");
-    $stmt->execute([':username' => $newUsername]);
-    $existingAdmin = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt = $conn->prepare("SELECT * FROM admin WHERE username = ?");
+    $stmt->bind_param("s", $newUsername);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $existingAdmin = $result->fetch_assoc();
 
     if ($existingAdmin) {
         $message = "Username already exists. Please choose a different username.";
     } else {
-        $stmt = $pdo->prepare("UPDATE admin SET username = :username WHERE id = :id");
-        $stmt->execute([':username' => $newUsername, ':id' => $_SESSION['admin_id']]);
+        $stmt = $conn->prepare("UPDATE admin SET username = ? WHERE id = ?");
+        $stmt->bind_param("si", $newUsername, $_SESSION['admin_id']);
+        $stmt->execute();
         $message = "Username changed successfully!";
     }
 }
@@ -102,23 +101,18 @@ if ($isAdmin && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_room']
     $maxRooms = $_POST['max_rooms'];
     $pricePerNight = $_POST['price_per_night'];
 
-    $stmt = $pdo->prepare("SELECT * FROM rooms WHERE room_type = :room_type");
-    $stmt->execute([':room_type' => $roomType]);
-    $existingRoom = $stmt->fetch(PDO::FETCH_ASSOC);
+    $stmt = $conn->prepare("SELECT * FROM rooms WHERE room_type = ?");
+    $stmt->bind_param("s", $roomType);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $existingRoom = $result->fetch_assoc();
 
     if ($existingRoom) {
         $message = "Room type already exists.";
     } else {
-        $stmt = $pdo->prepare("
-            INSERT INTO rooms (room_type, max_rooms, price_per_night, available_rooms)
-            VALUES (:room_type, :max_rooms, :price_per_night, :max_rooms)
-        ");
-        $stmt->execute([
-            ':room_type' => $roomType,
-            ':max_rooms' => $maxRooms,
-            ':price_per_night' => $pricePerNight
-           
-        ]);
+        $stmt = $conn->prepare("INSERT INTO rooms (room_type, max_rooms, price_per_night, available_rooms) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("sidi", $roomType, $maxRooms, $pricePerNight, $maxRooms);
+        $stmt->execute();
         $message = "Room type added successfully!";
     }
 }
@@ -127,78 +121,97 @@ if ($isAdmin && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_roo
     $roomType = $_POST['room_type'];
     $pricePerNight = $_POST['price_per_night'];
 
-    $stmt = $pdo->prepare("
-        UPDATE rooms 
-        SET price_per_night = :price 
-        WHERE room_type = :room_type
-    ");
-    $stmt->execute([
-        ':price' => $pricePerNight,
-        ':room_type' => $roomType
-    ]);
+    $stmt = $conn->prepare("UPDATE rooms SET price_per_night = ? WHERE room_type = ?");
+    $stmt->bind_param("ds", $pricePerNight, $roomType);
+    $stmt->execute();
     $message = "Room price updated successfully!";
 }
 
 if ($isAdmin && $_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['add_payment_method'])) {
     $methodName = $_POST['method_name'];
 
-    $stmt = $pdo->prepare("INSERT INTO payment_methods (method_name) VALUES (:method)");
-    $stmt->execute([':method' => $methodName]);
+    $stmt = $conn->prepare("INSERT INTO payment_methods (method_name) VALUES (?)");
+    $stmt->bind_param("s", $methodName);
+    $stmt->execute();
     $message = "Payment method added successfully!";
 }
 
 if ($isAdmin && isset($_GET['delete_payment_method'])) {
     $methodId = $_GET['delete_payment_method'];
 
-    $stmt = $pdo->prepare("DELETE FROM payment_methods WHERE method_id = :method_id");
-    $stmt->execute([':method_id' => $methodId]);
+    $stmt = $conn->prepare("DELETE FROM payment_methods WHERE method_id = ?");
+    $stmt->bind_param("i", $methodId);
+    $stmt->execute();
     $message = "Payment method deleted successfully!";
 }
 
 if ($isAdmin && isset($_GET['delete_booking'])) {
     $bookingId = $_GET['delete_booking'];
-    
-    $stmt = $pdo->prepare("DELETE FROM bookings WHERE booking_id = :id AND payment_status = 'pending'");
-    $stmt->execute([':id' => $bookingId]);
-    
-    if ($stmt->rowCount() > 0) {
+
+    $stmt = $conn->prepare("DELETE FROM bookings WHERE booking_id = ? AND payment_status = 'pending'");
+    $stmt->bind_param("i", $bookingId);
+    $stmt->execute();
+
+    if ($stmt->affected_rows > 0) {
         $message = "Booking deleted successfully!";
     } else {
         $message = "Could not delete booking - payment already confirmed or booking doesn't exist.";
     }
 }
+
 if ($isAdmin && isset($_GET['delete_room'])) {
-    $bookingId = $_GET['delete_room'];
-    
-    $stmt = $pdo->prepare("DELETE FROM rooms WHERE id = :id ");
-    $stmt->execute([':id' => $bookingId]);
-    
-    if ($stmt->rowCount() > 0) {
+    $roomId = $_GET['delete_room'];
+
+    $stmt = $conn->prepare("DELETE FROM rooms WHERE id = ?");
+    $stmt->bind_param("i", $roomId);
+    $stmt->execute();
+
+    if ($stmt->affected_rows > 0) {
         $message = "Room deleted successfully!";
-    } 
+    }
 }
 
-$stmt = $pdo->prepare("SELECT * FROM rooms");
+$rooms = [];
+$stmt = $conn->prepare("SELECT * FROM rooms");
 $stmt->execute();
-$rooms = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$result = $stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+    $rooms[] = $row;
+}
 
-$stmt = $pdo->prepare("SELECT * FROM bookings");
+$bookings = [];
+$stmt = $conn->prepare("SELECT * FROM bookings");
 $stmt->execute();
-$bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$result = $stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+    $bookings[] = $row;
+}
 
-$stmt = $pdo->prepare("SELECT * FROM payments");
+$payments = [];
+$stmt = $conn->prepare("SELECT * FROM payments");
 $stmt->execute();
-$payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$result = $stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+    $payments[] = $row;
+}
 
-$stmt = $pdo->prepare("SELECT * FROM payment_methods");
+$paymentMethods = [];
+$stmt = $conn->prepare("SELECT * FROM payment_methods");
 $stmt->execute();
-$paymentMethods = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$result = $stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+    $paymentMethods[] = $row;
+}
 
-$stmt = $pdo->prepare("SELECT * FROM user_comments");
+$comments = [];
+$stmt = $conn->prepare("SELECT * FROM user_comments");
 $stmt->execute();
-$comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$result = $stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+    $comments[] = $row;
+}
 
-
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -216,7 +229,7 @@ $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <h1>Admin Dashboard</h1>
         <div class="sub-header">
             <?php if ($isAdmin): ?>
-                <button onclick="location.href='admin.php?logout=true'">Logout</button>
+                <button onclick="location.href='admin.php?logout=true'"><a href="index.php">Logout</a></button>
             <?php endif; ?>
         </div>
     </div>

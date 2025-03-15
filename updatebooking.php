@@ -1,48 +1,55 @@
 <?php
 session_start();
 
+
 $host = 'localhost';
 $dbname = 'hotel_booking';
 $username = 'root';
 $password = '';
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
+$conn = new mysqli($host, $username, $password, $dbname);
+
+
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
 
-$roomTypes = [];
-try {
-    $stmt = $pdo->query("SELECT room_type FROM rooms");
-    $roomTypes = $stmt->fetchAll(PDO::FETCH_COLUMN);
-} catch (PDOException $e) {
-    die("Error fetching room types: " . $e->getMessage());
-}
-
-
-$currentBooking = null;
+$currentBooking = "BOOK67d4925d1ed14";
 $updateError = null;
-$cancelError = null;
 $successMessage = null;
 
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submitBookingId'])) {
     if (isset($_POST['bookingId'])) {
-        $bookingId = $_POST['bookingId'];
+        $bookingId = trim($_POST['bookingId']); 
 
-        try {
-            $stmt = $pdo->prepare("SELECT * FROM bookings WHERE booking_id = :booking_id");
-            $stmt->execute([':booking_id' => $bookingId]);
-            $currentBooking = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (empty($bookingId)) {
+            $updateError = "Booking ID cannot be empty!";
+        } else {
+            try {
+                
+                
+                $stmt = $conn->prepare("SELECT * FROM bookings WHERE booking_id = ?");
+                if ($stmt === false) {
+                    throw new Exception("Prepare failed: " . $conn->error);
+                }
+                $stmt->bind_param("s", $bookingId);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                $currentBooking = $result->fetch_assoc();
 
-            if (!$currentBooking) {
-                $updateError = "Booking ID not found!";
+                if (!$currentBooking) {
+                    $updateError = "Booking ID '$bookingId' not found!";
+                }
+            } catch (Exception $e) {
+                $updateError = $e->getMessage();
+            } finally {
+                if (isset($stmt)) {
+                    $stmt->close();
+                }
             }
-        } catch (PDOException $e) {
-            die("Error fetching booking details: " . $e->getMessage());
         }
     }
 }
@@ -50,18 +57,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submitBookingId'])) {
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['updateBooking'])) {
     if (isset($_POST['bookingId'])) {
-        $bookingId = $_POST['bookingId'];
+        $bookingId = trim($_POST['bookingId']);
 
         try {
             
-            $stmt = $pdo->prepare("SELECT * FROM bookings WHERE booking_id = :booking_id");
-            $stmt->execute([':booking_id' => $bookingId]);
-            $currentBooking = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            $stmt = $conn->prepare("SELECT * FROM bookings WHERE booking_id = ?");
+            if ($stmt === false) {
+                throw new Exception("Prepare failed: " . $conn->error);
+            }
+            $stmt->bind_param("s", $bookingId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $currentBooking = $result->fetch_assoc();
 
             if (!$currentBooking) {
-                $updateError = "Booking ID not found!";
+                $updateError = "Booking ID '$bookingId' not found!";
             } else {
-                
+               
                 $name = htmlspecialchars($_POST['updateName'] ?? '');
                 $email = htmlspecialchars($_POST['updateEmail'] ?? '');
                 $phone = htmlspecialchars($_POST['updatePhone'] ?? '');
@@ -70,7 +83,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['updateBooking'])) {
                 $checkIns = $_POST['updateCheckIn'] ?? [];
                 $checkOuts = $_POST['updateCheckOut'] ?? [];
 
-              
+                
+                
                 $updatedRooms = [];
                 foreach ($roomTypesInput as $index => $roomType) {
                     $updatedRooms[] = [
@@ -82,23 +96,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['updateBooking'])) {
                 }
 
                 
-                $stmt = $pdo->prepare("
+                $stmt = $conn->prepare("
                     UPDATE bookings
-                    SET name = :name, email = :email, phone = :phone, room_details = :room_details
-                    WHERE booking_id = :booking_id
+                    SET name = ?, email = ?, phone = ?, room_details = ?
+                    WHERE booking_id = ?
                 ");
-                $stmt->execute([
-                    ':name' => $name,
-                    ':email' => $email,
-                    ':phone' => $phone,
-                    ':room_details' => json_encode($updatedRooms),
-                    ':booking_id' => $bookingId
-                ]);
-
-                $successMessage = "Booking updated successfully!";
+                if ($stmt === false) {
+                    throw new Exception("Prepare failed: " . $conn->error);
+                }
+                $roomDetailsJson = json_encode($updatedRooms);
+                $stmt->bind_param("sssss", $name, $email, $phone, $roomDetailsJson, $bookingId);
+                if ($stmt->execute()) {
+                    $successMessage = "Booking updated successfully!";
+                } else {
+                    throw new Exception("Error updating booking: " . $stmt->error);
+                }
             }
-        } catch (PDOException $e) {
-            die("Error updating booking: " . $e->getMessage());
+        } catch (Exception $e) {
+            $updateError = $e->getMessage();
+        } finally {
+            if (isset($stmt)) {
+                $stmt->close();
+            }
         }
     }
 }
@@ -106,31 +125,48 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['updateBooking'])) {
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancelBooking'])) {
     if (isset($_POST['cancelBookingId'])) {
-        $bookingId = $_POST['cancelBookingId'];
+        $bookingId = trim($_POST['cancelBookingId']); 
 
         try {
             
-            $pdo->beginTransaction();
-
-         
-            $stmt = $pdo->prepare("DELETE FROM payments WHERE booking_id = :booking_id");
-            $stmt->execute([':booking_id' => $bookingId]);
+            $conn->begin_transaction();
 
             
-            $stmt = $pdo->prepare("DELETE FROM bookings WHERE booking_id = :booking_id");
-            $stmt->execute([':booking_id' => $bookingId]);
+            $stmt = $conn->prepare("DELETE FROM payments WHERE booking_id = ?");
+            if ($stmt === false) {
+                throw new Exception("Prepare failed: " . $conn->error);
+            }
+            $stmt->bind_param("s", $bookingId);
+            if (!$stmt->execute()) {
+                throw new Exception("Error deleting from payments: " . $stmt->error);
+            }
+
+            
+            $stmt = $conn->prepare("DELETE FROM bookings WHERE booking_id = ?");
+            if ($stmt === false) {
+                throw new Exception("Prepare failed: " . $conn->error);
+            }
+            $stmt->bind_param("s", $bookingId);
+            if (!$stmt->execute()) {
+                throw new Exception("Error deleting from bookings: " . $stmt->error);
+            }
 
            
-            $pdo->commit();
-
+            $conn->commit();
             $successMessage = "Booking canceled successfully!";
-        } catch (PDOException $e) {
+        } catch (Exception $e) {
            
-            $pdo->rollBack();
-            die("Error canceling booking: " . $e->getMessage());
+            $conn->rollback();
+            $updateError = $e->getMessage();
+        } finally {
+            if (isset($stmt)) {
+                $stmt->close();
+            }
         }
     }
 }
+
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -156,18 +192,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancelBooking'])) {
             <button id="showCancel">Cancel Booking</button>
         </div>
 
-        
         <div id="bookingIdForm" class="form-section update-form">
-            <form method="POST">
+            <form method="POST" action="">
                 <h2>Enter Booking ID</h2>
                 <label for="bookingId">Booking ID:</label>
                 <input type="text" id="bookingId" name="bookingId" required>
                 <input type="hidden" name="submitBookingId" value="1">
-                <button id="submitButton" type="submit">Submit</button>
+                <button type="submit">Submit</button>
             </form>
         </div>
 
-        
         <div id="bookedDetails" class="form-section" style="display: <?= $currentBooking ? 'block' : 'none'; ?>;">
             <?php if ($currentBooking): ?>
                 <h2>Current Booking Details</h2>
@@ -192,7 +226,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancelBooking'])) {
             <?php endif; ?>
         </div>
 
-      
         <div id="updateForm" class="form-section update" style="display: <?= $currentBooking ? 'block' : 'none'; ?>;">
             <form method="POST">
                 <h2>Manage Your Booking</h2>
@@ -243,7 +276,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancelBooking'])) {
             </form>
         </div>
 
-       
         <div id="cancelForm" class="form-section">
             <form method="POST">
                 <h2>Cancel Your Booking</h2>
@@ -253,9 +285,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancelBooking'])) {
 
                 <button type="submit" name="cancelBooking">Cancel Booking</button>
             </form>
-            <?php if ($cancelError): ?>
-                <p><?= $cancelError ?></p>
-            <?php elseif ($successMessage): ?>
+            
+            <?php if ($successMessage): ?>
                 <p><?= $successMessage ?></p>
             <?php endif; ?>
         </div>
@@ -266,10 +297,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancelBooking'])) {
             <p>2025 &copy; Copy Right Reserved, Luxury Hotel</p>
         </footer>
     </div>
-    
 
     <script>
-        
         document.addEventListener("DOMContentLoaded", function () {
             const showUpdateButton = document.getElementById("showUpdate");
             const showCancelButton = document.getElementById("showCancel");
@@ -280,31 +309,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['cancelBooking'])) {
             const submitButton = document.getElementById("submitButton");
             const bookingForm = document.querySelector("#bookingIdForm form");
 
-   
-        showUpdateButton.addEventListener("click", function () {
-            bookingIdForm.style.display = "block";
-            bookedDetails.style.display = "none";
-            updateForm.style.display = "none";
-            cancelForm.style.display = "none";
-        });
+            showUpdateButton.addEventListener("click", function () {
+                bookingIdForm.style.display = "block";
+                bookedDetails.style.display = "none";
+                updateForm.style.display = "none";
+                cancelForm.style.display = "none";
+            });
 
-    
-        bookingForm.addEventListener("submit", function (e) {
-            e.preventDefault(); // Prevent form submission
-            bookingIdForm.style.display = "none";
-            bookedDetails.style.display = "block";
-            updateForm.style.display = "block";
-        });
+            bookingForm.addEventListener("submit", function (e) {
+                e.preventDefault(); 
+                bookingIdForm.style.display = "none";
+                bookedDetails.style.display = "block";
+                updateForm.style.display = "block";
+            });
 
-   
-        showCancelButton.addEventListener("click", function () {
-            bookingIdForm.style.display = "none";
-            bookedDetails.style.display = "none";
-            updateForm.style.display = "none";
-            cancelForm.style.display = "block";
+            showCancelButton.addEventListener("click", function () {
+                bookingIdForm.style.display = "none";
+                bookedDetails.style.display = "none";
+                updateForm.style.display = "none";
+                cancelForm.style.display = "block";
+            });
         });
-    });
-
     </script>
 </body>
 </html>
