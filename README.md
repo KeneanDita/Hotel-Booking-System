@@ -15,10 +15,10 @@ The **Hotel Booking System** is a comprehensive web-based application designed t
 - **📋 Booking Management** – View and manage guest reservations.
 - **🧑‍💼 Guest Records** – Maintain customer information for better service.
 
-## 🖥️ Technologies Used
-- **Frontend:** 🌐 HTML, 🎨 CSS, ⚡ JavaScript
-- **Backend:** 🖥️ PHP
-- **Database:** 🗄️ MySQL
+## 🖥️ Techs
+- **Frontend:**  HTML, CSS, JavaScript
+- **Backend:** PHP
+- **Database:** MySQL
 
 ## 🛠️ Setup Instructions
 1. **📥 Clone the Repository:**
