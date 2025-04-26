@@ -21,11 +21,11 @@ The **Hotel Booking System** is a comprehensive web-based application designed t
 - **Database:** MySQL
 
 ## 🛠️ Setup Instructions
-1. **📥 Clone the Repository:**
+1. ** Clone the Repository:**
    ```bash
    git clone https://github.com/Knockemout/Hotel-Booking-System
    ```
-2. **📂 Navigate to the Project Directory:**
+2. ** Navigate to the Project Directory:**
    ```bash
    cd hotel-booking-system
    ```
